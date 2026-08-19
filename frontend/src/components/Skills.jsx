@@ -67,7 +67,7 @@ export default function Skills({ skills }) {
                     </div>
 
                     {/* Skill Info - Floating Parallax */}
-                    <div className="flex-grow translate-z-20 preserve-3d" style={{ transform: 'translateZ(20px)' }}>
+                    <div className="flex-grow min-w-0 translate-z-20 preserve-3d" style={{ transform: 'translateZ(20px)' }}>
                       <div className="flex justify-between items-center mb-2" style={{ transform: 'translateZ(10px)' }}>
                         <span className="font-semibold text-white text-sm md:text-base">{skill.name}</span>
                         <span className="text-xs font-bold text-slate-400">{skill.proficiency}%</span>

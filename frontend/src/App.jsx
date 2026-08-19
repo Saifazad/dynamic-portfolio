@@ -154,7 +154,7 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col selection:bg-indigo-500/30">
+    <div className="min-h-screen flex flex-col selection:bg-indigo-500/30 overflow-x-hidden">
       
       {/* Dynamic Navigation Header */}
       <nav className="glass-nav sticky top-0 left-0 w-full z-40 px-6 py-4">
@@ -267,7 +267,7 @@ export default function App() {
 
 
       {/* Main Container */}
-      <main className="flex-grow">
+      <main className="flex-grow overflow-x-hidden">
         {error && (
           <div className="max-w-3xl mx-auto mt-12 mx-6 p-5 rounded-2xl bg-red-500/10 border border-red-500/20 text-red-200 text-sm flex flex-col gap-3 items-center text-center">
             <span className="font-bold flex items-center gap-2 text-red-400">
