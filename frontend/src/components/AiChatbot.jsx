@@ -147,27 +147,72 @@ export default function AiChatbot({ backendUrl }) {
             </div>
 
             {/* Messages Viewport */}
-            <div className="flex-1 p-4 overflow-y-auto space-y-4 scrollbar-thin scrollbar-thumb-white/10">
-              {messages.map((msg) => (
-                <div 
-                  key={msg.id}
-                  className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}
-                >
+            <div 
+              data-lenis-prevent
+              className="flex-1 p-4 overflow-y-auto space-y-4 scrollbar-thin scrollbar-thumb-white/10"
+            >
+              {messages.map((msg) => {
+                // Parse bold text and bullet list markers
+                const formatMessageText = (text) => {
+                  if (!text) return '';
+                  const lines = text.split('\n');
+                  return lines.map((line, idx) => {
+                    let cleanLine = line;
+                    const isBullet = line.trim().startsWith('- ') || line.trim().startsWith('* ');
+                    if (isBullet) {
+                      cleanLine = line.trim().substring(2);
+                    }
+
+                    const parts = cleanLine.split(/\*\*([^*]+)\*\*/g);
+                    const renderedLine = parts.map((part, pIdx) => {
+                      if (pIdx % 2 === 1) {
+                        return <strong key={pIdx} className="font-extrabold text-white">{part}</strong>;
+                      }
+                      return part;
+                    });
+
+                    if (isBullet) {
+                      return (
+                        <div key={idx} className="flex items-start gap-2 my-1 ml-2 text-slate-200">
+                          <span className="text-[var(--primary-color)] font-bold">•</span>
+                          <span className="flex-1">{renderedLine}</span>
+                        </div>
+                      );
+                    }
+
+                    return (
+                      <p key={idx} className="min-h-[1.2em] mb-1 text-slate-200">
+                        {renderedLine}
+                      </p>
+                    );
+                  });
+                };
+
+                return (
                   <div 
-                    className={`max-w-[80%] rounded-2xl px-4 py-3 text-xs leading-relaxed ${
-                      msg.sender === 'user' 
-                        ? 'text-white' 
-                        : 'bg-white/5 border border-white/10 text-slate-200 rounded-tl-none'
-                    }`}
-                    style={{
-                      backgroundColor: msg.sender === 'user' ? 'var(--primary-color)' : undefined,
-                      borderTopRightRadius: msg.sender === 'user' ? '0px' : undefined
-                    }}
+                    key={msg.id}
+                    className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}
                   >
-                    <p className="whitespace-pre-line">{msg.text}</p>
+                    <div 
+                      className={`max-w-[85%] rounded-2xl px-4 py-3 text-xs leading-relaxed ${
+                        msg.sender === 'user' 
+                          ? 'text-white' 
+                          : 'bg-white/5 border border-white/10 rounded-tl-none'
+                      }`}
+                      style={{
+                        backgroundColor: msg.sender === 'user' ? 'var(--primary-color)' : undefined,
+                        borderTopRightRadius: msg.sender === 'user' ? '0px' : undefined
+                      }}
+                    >
+                      {msg.sender === 'user' ? (
+                        <p className="whitespace-pre-line">{msg.text}</p>
+                      ) : (
+                        <div className="space-y-1">{formatMessageText(msg.text)}</div>
+                      )}
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
               
               {isTyping && (
                 <div className="flex justify-start">
