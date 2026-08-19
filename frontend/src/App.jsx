@@ -163,7 +163,7 @@ export default function App() {
             onClick={() => setViewMode('portfolio')}
             className="text-lg font-black tracking-tight text-white cursor-pointer select-none"
           >
-            DYN<span style={{ color: 'var(--primary-color)' }}>FOLIO</span>
+            SAIF<span style={{ color: 'var(--primary-color)' }}>.DEV</span>
           </button>
 
           {/* Smooth Scroll Navigation Links */}
