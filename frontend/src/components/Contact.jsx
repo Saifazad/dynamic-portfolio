@@ -122,7 +122,7 @@ export default function Contact({ backendUrl = BACKEND_URL }) {
               </div>
               <div>
                 <h4 className="text-white font-bold mb-1">WhatsApp Me</h4>
-                <a href="https://wa.me/918084215228" target="_blank" rel="noreferrer" className="text-slate-400 hover:text-white text-sm font-semibold transition-colors select-all">
+                <a href="https://wa.me/918084215228" target="_blank" rel="noreferrer" className="block text-slate-400 hover:text-white text-sm font-semibold transition-colors select-all">
                   +91 8084215228
                 </a>
                 <span className="text-slate-500 text-[10px] uppercase font-bold mt-1.5 inline-block">Direct Chat Available</span>
