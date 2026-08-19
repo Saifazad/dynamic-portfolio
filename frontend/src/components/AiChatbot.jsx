@@ -2,6 +2,89 @@ import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Bot, X, Send, Sparkles, MessageSquare, Loader } from 'lucide-react';
 
+const ChatContactForm = ({ msgId, onSubmit, status }) => {
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [messageText, setMessageText] = useState('');
+  const [err, setErr] = useState('');
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (!name.trim() || !email.trim() || !messageText.trim()) {
+      setErr('All fields are required.');
+      return;
+    }
+    setErr('');
+    onSubmit(msgId, { name, email, message: messageText });
+  };
+
+  if (status === 'success') {
+    return (
+      <div className="mt-3 p-3 bg-green-500/10 border border-green-500/20 rounded-xl text-center">
+        <span className="inline-block w-6 h-6 rounded-full bg-green-500/20 text-green-400 flex items-center justify-center mx-auto mb-1.5 text-xs font-bold font-sans">✓</span>
+        <p className="text-[10px] font-bold text-white leading-snug">Message sent successfully!</p>
+        <p className="text-[9px] text-slate-300 mt-0.5">Saif will get back to you soon.</p>
+      </div>
+    );
+  }
+
+  return (
+    <form onSubmit={handleSubmit} className="mt-3 p-3 bg-black/30 border border-white/10 rounded-xl space-y-2 text-left">
+      <h4 className="text-[9px] uppercase font-bold text-[var(--primary-color)] tracking-wider">Direct Message Form</h4>
+      
+      <div>
+        <input 
+          type="text" 
+          placeholder="Your Name" 
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          disabled={status === 'submitting'}
+          className="w-full bg-black/40 border border-white/5 focus:border-white/20 focus:outline-none rounded-lg px-2.5 py-1 text-[11px] text-white placeholder:text-slate-500"
+        />
+      </div>
+      <div>
+        <input 
+          type="email" 
+          placeholder="Your Email" 
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          disabled={status === 'submitting'}
+          className="w-full bg-black/40 border border-white/5 focus:border-white/20 focus:outline-none rounded-lg px-2.5 py-1 text-[11px] text-white placeholder:text-slate-500"
+        />
+      </div>
+      <div>
+        <textarea 
+          placeholder="Write your message here..." 
+          value={messageText}
+          onChange={(e) => setMessageText(e.target.value)}
+          disabled={status === 'submitting'}
+          rows={2}
+          className="w-full bg-black/40 border border-white/5 focus:border-white/20 focus:outline-none rounded-lg px-2.5 py-1 text-[11px] text-white placeholder:text-slate-500 resize-none"
+        />
+      </div>
+
+      {err && <p className="text-[9px] text-red-400 font-bold mt-1">{err}</p>}
+      {status === 'error' && <p className="text-[9px] text-red-400 font-bold mt-1">Failed to send. Try again.</p>}
+
+      <button
+        type="submit"
+        disabled={status === 'submitting'}
+        className="w-full py-1.5 rounded-lg text-white text-[10px] font-bold transition-all cursor-pointer border-none flex items-center justify-center gap-1.5 hover:brightness-110 disabled:opacity-50 mt-1"
+        style={{ backgroundColor: 'var(--primary-color)' }}
+      >
+        {status === 'submitting' ? (
+          <>
+            <span className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
+            Sending...
+          </>
+        ) : (
+          'Send Inquiry'
+        )}
+      </button>
+    </form>
+  );
+};
+
 export default function AiChatbot({ backendUrl }) {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState([
@@ -81,11 +164,16 @@ export default function AiChatbot({ backendUrl }) {
       }
 
       const data = await response.json();
+      const rawText = data.response || '';
+      const hasForm = rawText.includes('[SHOW_CONTACT_FORM]');
+      const cleanText = rawText.replace('[SHOW_CONTACT_FORM]', '').trim();
       
       setMessages(prev => [...prev, {
         id: Date.now() + 1,
         sender: 'bot',
-        text: data.response,
+        text: cleanText,
+        showForm: hasForm,
+        formStatus: 'idle',
         timestamp: new Date()
       }]);
     } catch (error) {
@@ -98,6 +186,49 @@ export default function AiChatbot({ backendUrl }) {
       }]);
     } finally {
       setIsTyping(false);
+    }
+  };
+
+  const handleFormSubmit = async (msgId, formData) => {
+    setMessages(prev => prev.map(msg => {
+      if (msg.id === msgId) {
+        return { ...msg, formStatus: 'submitting' };
+      }
+      return msg;
+    }));
+
+    try {
+      const response = await fetch(`${backendUrl}/api/messages`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          name: formData.name,
+          email: formData.email,
+          subject: 'Inquiry via AI Chatbot Form',
+          message: formData.message
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to send contact inquiry');
+      }
+
+      setMessages(prev => prev.map(msg => {
+        if (msg.id === msgId) {
+          return { ...msg, formStatus: 'success' };
+        }
+        return msg;
+      }));
+    } catch (err) {
+      console.error('Chat Form Submit Error:', err);
+      setMessages(prev => prev.map(msg => {
+        if (msg.id === msgId) {
+          return { ...msg, formStatus: 'error' };
+        }
+        return msg;
+      }));
     }
   };
 
@@ -208,6 +339,13 @@ export default function AiChatbot({ backendUrl }) {
                         <p className="whitespace-pre-line">{msg.text}</p>
                       ) : (
                         <div className="space-y-1">{formatMessageText(msg.text)}</div>
+                      )}
+                      {msg.showForm && (
+                        <ChatContactForm 
+                          msgId={msg.id} 
+                          onSubmit={handleFormSubmit} 
+                          status={msg.formStatus} 
+                        />
                       )}
                     </div>
                   </div>
