@@ -168,38 +168,38 @@ export default function App() {
 
           {/* Smooth Scroll Navigation Links */}
           {viewMode === 'portfolio' && (
-            <div className="hidden md:flex items-center gap-7">
+            <div className="hidden md:flex items-center gap-4 lg:gap-7">
               <button 
                 onClick={() => document.getElementById('projects')?.scrollIntoView({ behavior: 'smooth' })} 
-                className="text-xs font-bold uppercase tracking-wider text-slate-400 hover:text-white transition-colors cursor-pointer"
+                className="text-[10px] lg:text-xs font-bold uppercase tracking-wider text-slate-400 hover:text-white transition-colors cursor-pointer"
               >
                 Projects
               </button>
               <button 
                 onClick={() => document.getElementById('timeline')?.scrollIntoView({ behavior: 'smooth' })} 
-                className="text-xs font-bold uppercase tracking-wider text-slate-400 hover:text-white transition-colors cursor-pointer"
+                className="text-[10px] lg:text-xs font-bold uppercase tracking-wider text-slate-400 hover:text-white transition-colors cursor-pointer"
               >
                 Journey
               </button>
               <button 
                 onClick={() => document.getElementById('skills')?.scrollIntoView({ behavior: 'smooth' })} 
-                className="text-xs font-bold uppercase tracking-wider text-slate-400 hover:text-white transition-colors cursor-pointer"
+                className="text-[10px] lg:text-xs font-bold uppercase tracking-wider text-slate-400 hover:text-white transition-colors cursor-pointer"
               >
                 Skills
               </button>
               <button 
                 onClick={() => document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' })} 
-                className="text-xs font-bold uppercase tracking-wider text-slate-400 hover:text-white transition-colors cursor-pointer"
+                className="text-[10px] lg:text-xs font-bold uppercase tracking-wider text-slate-400 hover:text-white transition-colors cursor-pointer"
               >
                 Contact
               </button>
             </div>
           )}
 
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2 lg:gap-4">
             {/* Color Accent Shifter */}
             {viewMode === 'portfolio' && (
-              <div className="hidden sm:flex items-center gap-2 mr-2 bg-white/5 border border-white/5 rounded-full px-3 py-1.5">
+              <div className="hidden lg:flex items-center gap-2 mr-2 bg-white/5 border border-white/5 rounded-full px-3 py-1.5">
                 {[
                   { name: 'indigo', hex: '#6366f1' },
                   { name: 'emerald', hex: '#10b981' },
@@ -223,7 +223,7 @@ export default function App() {
             {viewMode === 'admin' && isAuthenticated && (
               <button
                 onClick={handleLogout}
-                className="text-xs font-bold tracking-wider uppercase px-4 py-2.5 rounded-xl border border-red-500/20 hover:border-red-500/40 transition-all text-red-300 bg-red-500/10 cursor-pointer hover:bg-red-500/20"
+                className="text-[10px] lg:text-xs font-bold tracking-wider uppercase px-3 lg:px-4 py-2 lg:py-2.5 rounded-xl border border-red-500/20 hover:border-red-500/40 transition-all text-red-300 bg-red-500/10 cursor-pointer hover:bg-red-500/20"
               >
                 Logout
               </button>
@@ -231,7 +231,7 @@ export default function App() {
 
             <button
               onClick={() => setViewMode(viewMode === 'portfolio' ? 'admin' : 'portfolio')}
-              className="flex items-center gap-2 text-xs font-bold tracking-wider uppercase px-4 py-2.5 rounded-xl border border-white/10 hover:border-white/20 transition-all text-white bg-white/5 cursor-pointer hover:bg-white/10"
+              className="flex items-center gap-1.5 lg:gap-2 text-[10px] lg:text-xs font-bold tracking-wider uppercase px-3 lg:px-4 py-2 lg:py-2.5 rounded-xl border border-white/10 hover:border-white/20 transition-all text-white bg-white/5 cursor-pointer hover:bg-white/10"
             >
 
 
