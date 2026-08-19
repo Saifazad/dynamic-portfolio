@@ -72,6 +72,7 @@ ${education.map(ed => `- ${ed.degree} from ${ed.institution} (${ed.start_year} -
 
 6. CONTACT INFO:
 - Email: saifazad000@gmail.com (or via the contact form on this website)
+- WhatsApp: +91 8084215228 (Direct chat link: https://wa.me/918084215228)
 `;
 
     // Construct OpenAI messages array for Groq

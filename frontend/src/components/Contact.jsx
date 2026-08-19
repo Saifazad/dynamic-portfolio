@@ -112,6 +112,23 @@ export default function Contact({ backendUrl = BACKEND_URL }) {
               </div>
             </div>
           </FadeIn>
+
+          <FadeIn delay={0.25}>
+            <div className="glass p-6 rounded-2xl flex items-start gap-4 border border-white/5 relative group hover:border-white/10 transition-all duration-300">
+              <div className="p-3 bg-green-500/10 rounded-xl text-green-400 flex-shrink-0">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="22" height="22" fill="currentColor">
+                  <path d="M12.031 2a9.967 9.967 0 0 0-9.953 9.953c-.007 1.932.502 3.81 1.48 5.48L2 22l4.756-1.248a9.924 9.924 0 0 0 5.275 1.482h.005a9.965 9.965 0 0 0 9.964-9.953A9.972 9.972 0 0 0 12.031 2zm0 18.257c-1.636 0-3.238-.435-4.637-1.264l-.333-.198-3.45.905.922-3.364-.216-.345a8.218 8.218 0 0 1-1.258-4.321A8.257 8.257 0 0 1 12.03 3.738a8.255 8.255 0 0 1 8.252 8.255 8.258 8.258 0 0 1-8.251 8.264zm4.536-6.19c-.248-.124-1.467-.724-1.693-.807-.226-.08-.393-.124-.558.124-.166.248-.641.806-.784.97-.144.166-.29.187-.538.063a6.786 6.786 0 0 1-1.996-1.23c-.777-.694-1.303-1.55-1.455-1.811-.153-.26-.017-.402.107-.527.113-.112.249-.29.373-.435.124-.144.165-.248-.248-.413.083-.166.04-.31-.02-.435-.062-.124-.558-1.343-.765-1.84-.2-.48-.4-.413-.558-.423-.144-.007-.31-.007-.475-.007a.916.916 0 0 0-.662.31c-.227.248-.868.847-.868 2.066 0 1.218.889 2.396 1.012 2.56.124.167 1.752 2.675 4.244 3.75 1.705.733 2.395.812 3.242.687.525-.078 1.467-.6 1.674-1.18.206-.578.206-1.074.144-1.18-.06-.104-.226-.166-.474-.29z"/>
+                </svg>
+              </div>
+              <div>
+                <h4 className="text-white font-bold mb-1">WhatsApp Me</h4>
+                <a href="https://wa.me/918084215228" target="_blank" rel="noreferrer" className="text-slate-400 hover:text-white text-sm font-semibold transition-colors select-all">
+                  +91 8084215228
+                </a>
+                <span className="text-slate-500 text-[10px] uppercase font-bold mt-1.5 inline-block">Direct Chat Available</span>
+              </div>
+            </div>
+          </FadeIn>
         </div>
 
         {/* Right Side: Interactive 3D Form Card */}
