@@ -3,6 +3,7 @@ import { motion, useMotionValue, useTransform, useSpring } from 'framer-motion';
 import { useTheme } from '../context/ThemeContext';
 import { FadeIn } from './MotionProvider';
 import { ArrowRight, Github, FileText } from 'lucide-react';
+import { BACKEND_URL } from '../config';
 
 
 // Lightweight 3D Constellation Sphere with Elastic Spring Physics and cursor repulsion
@@ -418,7 +419,7 @@ export default function Hero({ onNavigateToProjects }) {
                 style={{ transform: 'translateZ(30px)' }}
               >
                 <img 
-                  src={theme.profile_image_url ? (theme.profile_image_url.startsWith('/uploads') ? `http://localhost:5001${theme.profile_image_url}` : theme.profile_image_url) : "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=500&auto=format&fit=crop&q=80"} 
+                  src={theme.profile_image_url ? (theme.profile_image_url.startsWith('/uploads') ? `${BACKEND_URL}${theme.profile_image_url}` : theme.profile_image_url) : "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=500&auto=format&fit=crop&q=80"} 
                   alt="Profile" 
                   className="w-full h-full object-cover select-none pointer-events-none transition-transform duration-700 group-hover:scale-105"
                 />

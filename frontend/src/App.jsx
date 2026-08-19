@@ -14,7 +14,7 @@ import AiChatbot from './components/AiChatbot';
 
 import { Layout, Shield, RefreshCw } from 'lucide-react';
 
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5001';
+import { BACKEND_URL } from './config';
 
 export default function App() {
   const { setTheme, setIsLoading, isLoading, setError, error, theme } = useTheme();

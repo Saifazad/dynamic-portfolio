@@ -1,5 +1,6 @@
 import React, { useRef, useState } from 'react';
 import { Plus, Upload, ChevronUp, ChevronDown, Edit2, Trash2 } from 'lucide-react';
+import { BACKEND_URL } from '../../config';
 
 export default function ProjectsTab({
   projects,
@@ -189,7 +190,7 @@ export default function ProjectsTab({
           {projects.map((proj, idx) => (
             <div key={proj.id} className="flex items-center justify-between p-4 bg-white/5 border border-white/5 rounded-2xl gap-4">
               <div className="flex items-center gap-4">
-                <img src={proj.image_url ? (proj.image_url.startsWith('/uploads') ? `http://localhost:5001${proj.image_url}` : proj.image_url) : 'https://picsum.photos/100/100?random=' + proj.id} alt={proj.title} className="w-16 h-10 object-cover rounded-md bg-slate-800" />
+                <img src={proj.image_url ? (proj.image_url.startsWith('/uploads') ? `${BACKEND_URL}${proj.image_url}` : proj.image_url) : 'https://picsum.photos/100/100?random=' + proj.id} alt={proj.title} className="w-16 h-10 object-cover rounded-md bg-slate-800" />
                 <div>
                   <h4 className="text-sm font-bold text-white leading-tight">{proj.title}</h4>
                   <span className="text-xs text-slate-500 font-semibold mt-1 inline-block">Order: {proj.order_index}</span>

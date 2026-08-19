@@ -5,6 +5,8 @@ import { ExternalLink, Github, X, Eye, Grid, List } from 'lucide-react';
 import TiltCard from './TiltCard';
 import TextReveal from './TextReveal';
 
+import { BACKEND_URL } from '../config';
+
 export default function Projects({ projects }) {
   const [selectedProject, setSelectedProject] = useState(null);
   const [activeFilter, setActiveFilter] = useState('All');
@@ -16,7 +18,7 @@ export default function Projects({ projects }) {
   const getProjImage = (imgUrl, fallback) => {
     if (!imgUrl) return fallback;
     if (imgUrl.startsWith('/uploads')) {
-      return `http://localhost:5001${imgUrl}`;
+      return `${BACKEND_URL}${imgUrl}`;
     }
     return imgUrl;
   };

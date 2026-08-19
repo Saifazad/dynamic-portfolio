@@ -4,8 +4,9 @@ import { FadeIn } from './MotionProvider';
 import { Mail, Send, CheckCircle, AlertCircle, User, FileText, MessageSquare } from 'lucide-react';
 import TiltCard from './TiltCard';
 import TextReveal from './TextReveal';
+import { BACKEND_URL } from '../config';
 
-export default function Contact({ backendUrl = 'http://localhost:5001' }) {
+export default function Contact({ backendUrl = BACKEND_URL }) {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
