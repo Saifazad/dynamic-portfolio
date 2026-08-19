@@ -352,9 +352,10 @@ export default function Hero({ onNavigateToProjects }) {
             </button>
             
             <a
-              href={theme.resume_url || "#"}
+              href={theme.resume_url || "/resume.pdf"}
               target="_blank"
               rel="noopener noreferrer"
+              download={theme.resume_url ? undefined : "Saif_Ali_Resume.pdf"}
               className="px-8 py-4 rounded-xl font-medium border border-white/10 bg-white/5 hover:bg-white/10 transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer text-white"
             >
               <FileText size={18} />
