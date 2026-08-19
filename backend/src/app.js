@@ -21,6 +21,7 @@ app.use(morgan('dev'));
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
 // Routing
+app.get('/', (req, res) => res.send('Backend is running!'));
 app.use('/api', apiRouter);
 
 // Global Error Handler Middleware
