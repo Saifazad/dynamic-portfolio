@@ -84,7 +84,7 @@ export default function DeveloperConsole({ projects = [], skills = [] }) {
       case 'contact':
         newLogs.push(
           { text: 'Inquiries connection parameters:', type: 'sys' },
-          { text: 'Email: saif@example.com', type: 'info' },
+          { text: 'Email: saifazad000@gmail.com', type: 'info' },
           { text: 'You can also drop a message using the Contact Form section below.', type: 'info' }
         );
         break;

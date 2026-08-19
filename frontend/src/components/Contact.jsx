@@ -91,7 +91,7 @@ export default function Contact({ backendUrl = BACKEND_URL }) {
               </div>
               <div>
                 <h4 className="text-white font-bold mb-1">Email Me</h4>
-                <p className="text-slate-400 text-sm break-all select-all">saif@example.com</p>
+                <p className="text-slate-400 text-sm break-all select-all">saifazad000@gmail.com</p>
                 <span className="text-slate-500 text-[10px] uppercase font-bold mt-1.5 inline-block">Response under 24 hours</span>
               </div>
             </div>
@@ -105,11 +105,9 @@ export default function Contact({ backendUrl = BACKEND_URL }) {
               <div>
                 <h4 className="text-white font-bold mb-1">Social Channels</h4>
                 <div className="flex gap-3 mt-1.5">
-                  <a href="https://github.com" target="_blank" rel="noreferrer" className="text-slate-400 hover:text-white text-sm font-semibold transition-colors">GitHub</a>
+                  <a href="https://github.com/Saifazad" target="_blank" rel="noreferrer" className="text-slate-400 hover:text-white text-sm font-semibold transition-colors">GitHub</a>
                   <span className="text-slate-700">•</span>
-                  <a href="https://linkedin.com" target="_blank" rel="noreferrer" className="text-slate-400 hover:text-white text-sm font-semibold transition-colors">LinkedIn</a>
-                  <span className="text-slate-700">•</span>
-                  <a href="https://twitter.com" target="_blank" rel="noreferrer" className="text-slate-400 hover:text-white text-sm font-semibold transition-colors">Twitter</a>
+                  <a href="https://linkedin.com/in/saifazad" target="_blank" rel="noreferrer" className="text-slate-400 hover:text-white text-sm font-semibold transition-colors">LinkedIn</a>
                 </div>
               </div>
             </div>

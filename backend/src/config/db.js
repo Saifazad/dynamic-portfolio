@@ -83,10 +83,27 @@ const mockDb = {
     }
   ],
   skills: [
-    { id: 1, name: "Flutter", category: "Mobile", proficiency: 90 },
-    { id: 2, name: "React", category: "Frontend", proficiency: 85 },
-    { id: 3, name: "Node.js", category: "Backend", proficiency: 85 },
-    { id: 4, name: "SQL", category: "Database", proficiency: 80 }
+    { id: 1, name: "Flutter", category: "Mobile", proficiency: 95 },
+    { id: 2, name: "Dart", category: "Languages", proficiency: 95 },
+    { id: 3, name: "JavaScript", category: "Languages", proficiency: 90 },
+    { id: 4, name: "TypeScript", category: "Languages", proficiency: 85 },
+    { id: 5, name: "React.js", category: "Frontend", proficiency: 90 },
+    { id: 6, name: "Next.js", category: "Frontend", proficiency: 85 },
+    { id: 7, name: "Provider", category: "Mobile", proficiency: 90 },
+    { id: 8, name: "GoRouter", category: "Mobile", proficiency: 85 },
+    { id: 9, name: "Node.js", category: "Backend", proficiency: 85 },
+    { id: 10, name: "Express.js", category: "Backend", proficiency: 85 },
+    { id: 11, name: "Redux Toolkit", category: "Frontend", proficiency: 80 },
+    { id: 12, name: "MySQL", category: "Database", proficiency: 80 },
+    { id: 13, name: "REST API", category: "Backend", proficiency: 90 },
+    { id: 14, name: "Axios", category: "Tools", proficiency: 85 },
+    { id: 15, name: "Dio", category: "Tools", proficiency: 90 },
+    { id: 16, name: "Bcrypt.js", category: "Tools", proficiency: 80 },
+    { id: 17, name: "Tailwind CSS", category: "Frontend", proficiency: 90 },
+    { id: 18, name: "Flutter Animate", category: "Mobile", proficiency: 85 },
+    { id: 19, name: "MVVM Architecture", category: "Tools", proficiency: 90 },
+    { id: 20, name: "SaaS Architecture", category: "Tools", proficiency: 85 },
+    { id: 21, name: "PRD Writing", category: "Tools", proficiency: 80 }
   ],
   messages: []
 };
