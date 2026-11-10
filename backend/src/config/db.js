@@ -5,7 +5,7 @@ const { Pool } = require('pg');
 let pool = null;
 let isMockDatabase = false;
 
-const DATABASE_URL = process.env.DATABASE_URL;
+const DATABASE_URL = process.env.DATABASE_URL || process.env.NEON_URL;
 
 if (DATABASE_URL) {
   try {
