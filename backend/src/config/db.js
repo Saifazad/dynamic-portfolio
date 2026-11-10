@@ -158,7 +158,10 @@ const hasSupabaseCreds = process.env.SUPABASE_URL &&
 
 if (hasSupabaseCreds) {
   try {
-    supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY);
+    supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY, {
+      realtime: { enabled: false },
+      auth: { persistSession: false, autoRefreshToken: false }
+    });
     console.log('Successfully connected to Supabase Client');
   } catch (error) {
     console.error('Error initializing Supabase Client:', error);
