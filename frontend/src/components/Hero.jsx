@@ -421,7 +421,7 @@ export default function Hero({ onNavigateToProjects }) {
               >
                 <img 
                   src={theme.profile_image_url ? (theme.profile_image_url.startsWith('/uploads') ? `${BACKEND_URL}${theme.profile_image_url}` : theme.profile_image_url) : "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=500&auto=format&fit=crop&q=80"} 
-                  alt="Profile" 
+                  alt="Saif Ali - Flutter & Full-Stack Developer" 
                   className="w-full h-full object-cover select-none pointer-events-none transition-transform duration-700 group-hover:scale-105"
                 />
                 
