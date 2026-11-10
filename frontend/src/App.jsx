@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Lenis from 'lenis';
-import { motion, useScroll, useTransform } from 'framer-motion';
+import { motion, useScroll, useTransform, AnimatePresence } from 'framer-motion';
 import { useTheme } from './context/ThemeContext';
 import Hero from './components/Hero';
 import Projects from './components/Projects';
@@ -12,7 +12,7 @@ import CustomCursor from './components/CustomCursor';
 import AdminDashboard from './components/AdminDashboard';
 import AiChatbot from './components/AiChatbot';
 
-import { Layout, Shield, RefreshCw } from 'lucide-react';
+import { Layout, Shield, RefreshCw, Palette, Sparkles, Send } from 'lucide-react';
 
 import { BACKEND_URL } from './config';
 
@@ -20,12 +20,50 @@ export default function App() {
   const { setTheme, setIsLoading, isLoading, setError, error, theme } = useTheme();
   const { scrollYProgress } = useScroll();
 
-  
   // View mode switcher: 'portfolio' or 'admin'
   const [viewMode, setViewMode] = useState('portfolio');
   const [isAuthenticated, setIsAuthenticated] = useState(() => {
     return sessionStorage.getItem('admin_authenticated') === 'true';
   });
+
+  const [isThemePickerOpen, setIsThemePickerOpen] = useState(false);
+  const themePickerRef = useRef(null);
+
+  // Hidden admin route detection (#admin or #admin-login or Ctrl+Shift+A)
+  useEffect(() => {
+    const checkAdminRoute = () => {
+      const hash = window.location.hash.toLowerCase();
+      const search = window.location.search.toLowerCase();
+      if (hash === '#admin' || hash === '#admin-login' || search.includes('admin=true')) {
+        setViewMode('admin');
+      }
+    };
+    checkAdminRoute();
+    window.addEventListener('hashchange', checkAdminRoute);
+
+    // Secret shortcut: Ctrl+Shift+A / Cmd+Shift+A toggles admin
+    const handleKeyDown = (e) => {
+      if ((e.metaKey || e.ctrlKey) && e.shiftKey && (e.key === 'A' || e.key === 'a')) {
+        e.preventDefault();
+        setViewMode(prev => prev === 'portfolio' ? 'admin' : 'portfolio');
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+
+    // Close theme picker on outside click
+    const handleOutsideClick = (e) => {
+      if (themePickerRef.current && !themePickerRef.current.contains(e.target)) {
+        setIsThemePickerOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleOutsideClick);
+
+    return () => {
+      window.removeEventListener('hashchange', checkAdminRoute);
+      window.removeEventListener('keydown', handleKeyDown);
+      document.removeEventListener('mousedown', handleOutsideClick);
+    };
+  }, []);
 
   const [loginPassword, setLoginPassword] = useState('');
   const [loginError, setLoginError] = useState(null);
@@ -196,57 +234,112 @@ export default function App() {
             </div>
           )}
 
-          <div className="flex items-center gap-2 lg:gap-4">
-            {/* Color Accent Shifter */}
+          <div className="flex items-center gap-2 lg:gap-3.5">
+            {/* Sleek Theme / Accent Dropdown */}
             {viewMode === 'portfolio' && (
-              <div className="hidden lg:flex items-center gap-2 mr-2 bg-white/5 border border-white/5 rounded-full px-3 py-1.5">
-                {[
-                  { name: 'indigo', hex: '#6366f1' },
-                  { name: 'emerald', hex: '#10b981' },
-                  { name: 'cyan', hex: '#06b6d4' },
-                  { name: 'rose', hex: '#f43f5e' }
-                ].map((color) => (
-                  <button
-                    key={color.name}
-                    onClick={() => document.documentElement.style.setProperty('--primary-color', color.hex)}
-                    className="w-3.5 h-3.5 rounded-full transition-transform hover:scale-125 cursor-pointer relative"
-                    style={{ 
-                      backgroundColor: color.hex,
-                      boxShadow: `0 0 8px ${color.hex}`
-                    }}
-                    title={`Theme: ${color.name}`}
+              <div className="relative" ref={themePickerRef}>
+                <button
+                  onClick={() => setIsThemePickerOpen(prev => !prev)}
+                  className="w-9 h-9 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 flex items-center justify-center text-slate-300 hover:text-white transition-all cursor-pointer relative"
+                  title="Customize Theme Accent"
+                  aria-label="Theme Color Picker"
+                >
+                  <Palette size={16} style={{ color: 'var(--primary-color)' }} />
+                  <span 
+                    className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full ring-2 ring-slate-950 shadow-sm"
+                    style={{ backgroundColor: 'var(--primary-color)' }}
                   />
-                ))}
+                </button>
+
+                <AnimatePresence>
+                  {isThemePickerOpen && (
+                    <motion.div
+                      initial={{ opacity: 0, scale: 0.9, y: 8 }}
+                      animate={{ opacity: 1, scale: 1, y: 0 }}
+                      exit={{ opacity: 0, scale: 0.9, y: 8 }}
+                      transition={{ duration: 0.16 }}
+                      className="absolute right-0 mt-2 p-2.5 rounded-2xl glass border border-white/10 shadow-2xl backdrop-blur-xl z-50 flex items-center gap-2.5"
+                    >
+                      {[
+                        { name: 'Indigo', hex: '#6366f1' },
+                        { name: 'Emerald', hex: '#10b981' },
+                        { name: 'Cyan', hex: '#06b6d4' },
+                        { name: 'Rose', hex: '#f43f5e' }
+                      ].map((color) => (
+                        <button
+                          key={color.name}
+                          onClick={() => {
+                            document.documentElement.style.setProperty('--primary-color', color.hex);
+                            setIsThemePickerOpen(false);
+                          }}
+                          className="w-6 h-6 rounded-full transition-transform hover:scale-125 cursor-pointer relative flex items-center justify-center group"
+                          style={{ 
+                            backgroundColor: color.hex,
+                            boxShadow: `0 0 10px ${color.hex}40`
+                          }}
+                          title={`Theme: ${color.name}`}
+                        >
+                          <span className="opacity-0 group-hover:opacity-100 absolute -bottom-6 text-[9px] font-bold text-slate-300 bg-slate-900/90 px-1.5 py-0.5 rounded border border-white/10 whitespace-nowrap pointer-events-none transition-opacity">
+                            {color.name}
+                          </span>
+                        </button>
+                      ))}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
             )}
 
-            {viewMode === 'admin' && isAuthenticated && (
+            {/* If Authenticated in Portfolio mode: Subtle Admin indicator */}
+            {viewMode === 'portfolio' && isAuthenticated && (
               <button
-                onClick={handleLogout}
-                className="text-[10px] lg:text-xs font-bold tracking-wider uppercase px-3 lg:px-4 py-2 lg:py-2.5 rounded-xl border border-red-500/20 hover:border-red-500/40 transition-all text-red-300 bg-red-500/10 cursor-pointer hover:bg-red-500/20"
+                onClick={() => setViewMode('admin')}
+                className="flex items-center gap-1.5 text-[10px] lg:text-xs font-bold tracking-wider uppercase px-3 py-2 rounded-xl border border-white/10 hover:border-white/20 transition-all text-white bg-white/5 cursor-pointer"
+                title="Open Admin Dashboard"
               >
-                Logout
+                <Shield size={13} style={{ color: 'var(--primary-color)' }} />
+                <span className="hidden sm:inline">Admin</span>
               </button>
             )}
 
-            <button
-              onClick={() => setViewMode(viewMode === 'portfolio' ? 'admin' : 'portfolio')}
-              className="flex items-center gap-1.5 lg:gap-2 text-[10px] lg:text-xs font-bold tracking-wider uppercase px-3 lg:px-4 py-2 lg:py-2.5 rounded-xl border border-white/10 hover:border-white/20 transition-all text-white bg-white/5 cursor-pointer hover:bg-white/10"
-            >
-
-
-              {viewMode === 'portfolio' ? (
-                <>
-                  <Shield size={14} style={{ color: 'var(--primary-color)' }} />
-                  Admin Dashboard
-                </>
-              ) : (
-                <>
+            {/* In Admin Mode: Controls */}
+            {viewMode === 'admin' && (
+              <>
+                {isAuthenticated && (
+                  <button
+                    onClick={handleLogout}
+                    className="text-[10px] lg:text-xs font-bold tracking-wider uppercase px-3 lg:px-4 py-2 lg:py-2.5 rounded-xl border border-red-500/20 hover:border-red-500/40 transition-all text-red-300 bg-red-500/10 cursor-pointer hover:bg-red-500/20"
+                  >
+                    Logout
+                  </button>
+                )}
+                <button
+                  onClick={() => setViewMode('portfolio')}
+                  className="flex items-center gap-1.5 text-[10px] lg:text-xs font-bold tracking-wider uppercase px-3 lg:px-4 py-2 lg:py-2.5 rounded-xl border border-white/10 hover:border-white/20 transition-all text-white bg-white/5 cursor-pointer hover:bg-white/10"
+                >
                   <Layout size={14} style={{ color: 'var(--primary-color)' }} />
                   View Portfolio
-                </>
-              )}
-            </button>
+                </button>
+              </>
+            )}
+
+            {/* Primary Action Button (Replaces Admin Dashboard) */}
+            {viewMode === 'portfolio' && (
+              <button
+                onClick={() => {
+                  const el = document.getElementById('contact');
+                  if (el) el.scrollIntoView({ behavior: 'smooth' });
+                }}
+                className="flex items-center gap-2 text-[11px] lg:text-xs font-black tracking-wider uppercase px-4 lg:px-5 py-2.5 rounded-xl text-white shadow-lg cursor-pointer hover:brightness-110 active:scale-95 transition-all"
+                style={{ 
+                  backgroundColor: 'var(--primary-color)',
+                  boxShadow: `0 4px 20px -4px var(--primary-color)`
+                }}
+              >
+                <Sparkles size={14} className="animate-pulse" />
+                Hire Me
+              </button>
+            )}
           </div>
         </div>
 
@@ -373,9 +466,24 @@ export default function App() {
 
       {/* Footer */}
       <footer className="py-12 border-t border-white/5 bg-slate-950/60 text-center">
-        <p className="text-slate-500 text-xs font-semibold tracking-wider uppercase">
-          &copy; {new Date().getFullYear()} Saif. Built with React, Express & Supabase.
+        <p className="text-slate-400 text-xs font-semibold tracking-wider uppercase">
+          &copy; {new Date().getFullYear()} Saif Ali. Crafted with React, Node.js & PostgreSQL.
         </p>
+        <div className="mt-3">
+          <a
+            href="#admin-login"
+            onClick={(e) => {
+              e.preventDefault();
+              setViewMode('admin');
+              window.location.hash = '#admin-login';
+            }}
+            className="text-[10px] text-slate-600 hover:text-slate-400 transition-colors uppercase tracking-widest font-semibold inline-flex items-center gap-1.5 cursor-pointer opacity-40 hover:opacity-100"
+            title="Owner Portal"
+          >
+            <Shield size={10} />
+            Portal
+          </a>
+        </div>
       </footer>
     </div>
   );
