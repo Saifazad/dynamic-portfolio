@@ -11,6 +11,7 @@ import ScrollBackground from './components/ScrollBackground';
 import CustomCursor from './components/CustomCursor';
 import AdminDashboard from './components/AdminDashboard';
 import AiChatbot from './components/AiChatbot';
+import AnimatedLogo from './components/AnimatedLogo';
 
 import { Layout, Shield, RefreshCw, Palette, Sparkles, Send } from 'lucide-react';
 
@@ -197,12 +198,8 @@ export default function App() {
       {/* Dynamic Navigation Header */}
       <nav className="glass-nav sticky top-0 left-0 w-full z-40 px-6 py-4">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <button 
-            onClick={() => setViewMode('portfolio')}
-            className="text-lg font-black tracking-tight text-white cursor-pointer select-none"
-          >
-            SAIF<span style={{ color: 'var(--primary-color)' }}>.DEV</span>
-          </button>
+          {/* Interactive Animated Logo */}
+          <AnimatedLogo onClick={() => setViewMode('portfolio')} />
 
           {/* Smooth Scroll Navigation Links */}
           {viewMode === 'portfolio' && (
