@@ -5,6 +5,7 @@ import { Cpu, Search, Award, Sparkles, Trophy } from 'lucide-react';
 import TiltCard from './TiltCard';
 import TextReveal from './TextReveal';
 import { FadeIn } from './MotionProvider';
+import TechIcon from './TechIcon';
 
 export default function Skills({ skills }) {
   const { theme } = useTheme();
@@ -40,6 +41,14 @@ export default function Skills({ skills }) {
     });
 
     return { totalCount: total, averageProficiency: avg, bestCategory: bestCat };
+  }, [skills]);
+
+  // Featured top skills for the animated floating marquee ribbon
+  const topFeaturedSkills = useMemo(() => {
+    if (!skills || skills.length === 0) return [];
+    return [...skills]
+      .filter(s => s.proficiency >= 85)
+      .slice(0, 10);
   }, [skills]);
 
   // Extract unique categories dynamically
@@ -130,6 +139,44 @@ export default function Skills({ skills }) {
               </div>
             </div>
           </div>
+
+          {/* Animated Interactive Floating Tech Stack Ribbon */}
+          {topFeaturedSkills.length > 0 && (
+            <div className="relative max-w-5xl mx-auto overflow-hidden rounded-2xl py-3 border border-white/5 bg-slate-900/30 backdrop-blur-md">
+              <div className="absolute left-0 top-0 bottom-0 w-20 bg-gradient-to-r from-slate-950 via-slate-950/80 to-transparent z-10 pointer-events-none" />
+              <div className="absolute right-0 top-0 bottom-0 w-20 bg-gradient-to-l from-slate-950 via-slate-950/80 to-transparent z-10 pointer-events-none" />
+              
+              <motion.div
+                className="flex gap-3.5 items-center w-max"
+                animate={animationsEnabled ? { x: ['0%', '-50%'] } : false}
+                transition={{
+                  repeat: Infinity,
+                  ease: 'linear',
+                  duration: 25
+                }}
+              >
+                {[...topFeaturedSkills, ...topFeaturedSkills].map((item, idx) => (
+                  <button
+                    key={`${item.id}-${idx}`}
+                    className="flex items-center gap-2.5 px-4 py-2 rounded-xl bg-white/5 border border-white/5 hover:border-[var(--primary-color)]/50 hover:bg-white/10 transition-all cursor-pointer group select-none flex-shrink-0"
+                    onClick={() => {
+                      setSelectedCategory('All');
+                      setSearchQuery(item.name);
+                    }}
+                    title={`Filter by ${item.name}`}
+                  >
+                    <TechIcon name={item.name} size={18} />
+                    <span className="text-xs font-bold text-white group-hover:text-[var(--primary-color)] transition-colors">
+                      {item.name}
+                    </span>
+                    <span className="text-[10px] font-black px-1.5 py-0.5 rounded-md bg-white/10 text-slate-300">
+                      {item.proficiency}%
+                    </span>
+                  </button>
+                ))}
+              </motion.div>
+            </div>
+          )}
 
           {/* Interactive Filtering Tabs & Search Bar */}
           <div className="flex flex-col md:flex-row gap-4 items-center justify-between max-w-5xl mx-auto bg-slate-900/35 border border-white/5 rounded-2xl p-4">
@@ -248,7 +295,7 @@ export default function Skills({ skills }) {
                           </svg>
 
                           {/* Skill Icon Centered */}
-                          <div className="absolute w-8 h-8 flex items-center justify-center text-slate-300">
+                          <div className="absolute w-8 h-8 flex items-center justify-center transition-transform duration-300 group-hover:scale-110">
                             {skill.icon_svg ? (
                               <div 
                                 className="w-full h-full flex items-center justify-center svg-icon-container" 
@@ -256,7 +303,7 @@ export default function Skills({ skills }) {
                                 style={{ color: 'var(--primary-color)' }}
                               />
                             ) : (
-                              <Cpu size={18} style={{ color: 'var(--primary-color)' }} />
+                              <TechIcon name={skill.name} size={24} />
                             )}
                           </div>
                         </div>
