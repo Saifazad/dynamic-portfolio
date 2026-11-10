@@ -1,70 +1,41 @@
-const { supabase, mockDb, isMockDatabase } = require('../config/db');
+const { pool, mockDb, isMockDatabase } = require('../config/db');
 
 class DbService {
-  async getPortfolioData() {
-    if (isMockDatabase) {
-      return {
-        site_config: mockDb.site_config,
-        projects: [...mockDb.projects].sort((a, b) => a.order_index - b.order_index),
-        education: [...mockDb.education],
-        experience: [...mockDb.experience],
-        skills: [...mockDb.skills].sort((a, b) => b.proficiency - a.proficiency)
-      };
-    }
-
-    // Parallel fetching for optimal response times
-    const [configRes, projectsRes, educationRes, experienceRes, skillsRes] = await Promise.all([
-      supabase.from('site_config').select('*').eq('id', 1).single(),
-      supabase.from('projects').select('*').order('order_index', { ascending: true }),
-      supabase.from('education').select('*').order('start_year', { ascending: false }),
-      supabase.from('experience').select('*').order('created_at', { ascending: false }),
-      supabase.from('skills').select('*').order('proficiency', { ascending: false })
-    ]);
-
-    if (configRes.error && configRes.error.code !== 'PGRST116') {
-      throw configRes.error;
-    }
-    if (projectsRes.error) throw projectsRes.error;
-    if (educationRes.error) throw educationRes.error;
-    if (experienceRes.error) throw experienceRes.error;
-    if (skillsRes.error) throw skillsRes.error;
-
-    // Handle initial state where site_config might be empty
-    let site_config = configRes.data;
-    if (!site_config) {
-      // Create default
-      const { data: defaultData, error: insertError } = await supabase.from('site_config').insert({
-        id: 1,
-        hero_title: "Hi, I'm Saif. I Build Dynamic Full-Stack Applications.",
-        hero_subtitle: "A passionate developer specialized in React, Node.js, and Cloud Infrastructure.",
-        profile_image_url: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=500&auto=format&fit=crop&q=80",
-        primary_color: "#6366f1",
-        font_family: "Inter",
-        enable_animations: true,
-        resume_url: "https://example.com/resume.pdf",
-        stat_1_num: "4+",
-        stat_1_lbl: "Years Exp",
-        stat_2_num: "15+",
-        stat_2_lbl: "Live Projects",
-        stat_3_num: "100%",
-        stat_3_lbl: "Success Rate",
-        profile_tag_1: "React",
-        profile_tag_2: "Node.js",
-        profile_tag_3: "Full-Stack",
-        profile_tag_4: "Supabase"
-      }).select().single();
-      
-      if (insertError) throw insertError;
-      site_config = defaultData;
-    }
-
+  getMockPortfolioData() {
     return {
-      site_config,
-      projects: projectsRes.data || [],
-      education: educationRes.data || [],
-      experience: experienceRes.data || [],
-      skills: skillsRes.data || []
+      site_config: mockDb.site_config,
+      projects: [...mockDb.projects].sort((a, b) => a.order_index - b.order_index),
+      education: [...mockDb.education],
+      experience: [...mockDb.experience],
+      skills: [...mockDb.skills].sort((a, b) => b.proficiency - a.proficiency)
     };
+  }
+
+  async getPortfolioData() {
+    if (!pool) {
+      return this.getMockPortfolioData();
+    }
+
+    try {
+      const [configRes, projectsRes, educationRes, experienceRes, skillsRes] = await Promise.all([
+        pool.query('SELECT * FROM site_config WHERE id = 1'),
+        pool.query('SELECT * FROM projects ORDER BY order_index ASC, id ASC'),
+        pool.query('SELECT * FROM education ORDER BY start_year DESC, id DESC'),
+        pool.query('SELECT * FROM experience ORDER BY created_at DESC, id DESC'),
+        pool.query('SELECT * FROM skills ORDER BY proficiency DESC, id ASC')
+      ]);
+
+      return {
+        site_config: configRes.rows[0] || mockDb.site_config,
+        projects: projectsRes.rows || [],
+        education: educationRes.rows || [],
+        experience: experienceRes.rows || [],
+        skills: skillsRes.rows || []
+      };
+    } catch (err) {
+      console.warn('⚠️ Neon DB query failed, falling back to mock database:', err.message);
+      return this.getMockPortfolioData();
+    }
   }
 
   async updateSiteConfig(configData) {
@@ -74,7 +45,7 @@ class DbService {
       profile_tag_1, profile_tag_2, profile_tag_3, profile_tag_4
     } = configData;
     
-    if (isMockDatabase) {
+    if (!pool) {
       mockDb.site_config = {
         ...mockDb.site_config,
         hero_title: hero_title !== undefined ? hero_title : mockDb.site_config.hero_title,
@@ -98,27 +69,45 @@ class DbService {
       return mockDb.site_config;
     }
 
-    const { data, error } = await supabase
-      .from('site_config')
-      .update({ 
-        hero_title, hero_subtitle, profile_image_url, primary_color, font_family, enable_animations, resume_url, 
-        stat_1_num, stat_1_lbl, stat_2_num, stat_2_lbl, stat_3_num, stat_3_lbl,
-        profile_tag_1, profile_tag_2, profile_tag_3, profile_tag_4,
-        updated_at: new Date() 
-      })
-      .eq('id', 1)
-      .select()
-      .single();
+    const query = `
+      UPDATE site_config SET 
+        hero_title = COALESCE($1, hero_title),
+        hero_subtitle = COALESCE($2, hero_subtitle),
+        profile_image_url = COALESCE($3, profile_image_url),
+        primary_color = COALESCE($4, primary_color),
+        font_family = COALESCE($5, font_family),
+        enable_animations = COALESCE($6, enable_animations),
+        resume_url = COALESCE($7, resume_url),
+        stat_1_num = COALESCE($8, stat_1_num),
+        stat_1_lbl = COALESCE($9, stat_1_lbl),
+        stat_2_num = COALESCE($10, stat_2_num),
+        stat_2_lbl = COALESCE($11, stat_2_lbl),
+        stat_3_num = COALESCE($12, stat_3_num),
+        stat_3_lbl = COALESCE($13, stat_3_lbl),
+        profile_tag_1 = COALESCE($14, profile_tag_1),
+        profile_tag_2 = COALESCE($15, profile_tag_2),
+        profile_tag_3 = COALESCE($16, profile_tag_3),
+        profile_tag_4 = COALESCE($17, profile_tag_4),
+        updated_at = NOW()
+      WHERE id = 1
+      RETURNING *
+    `;
 
-    if (error) throw error;
-    return data;
+    const values = [
+      hero_title, hero_subtitle, profile_image_url, primary_color, font_family, enable_animations, resume_url,
+      stat_1_num, stat_1_lbl, stat_2_num, stat_2_lbl, stat_3_num, stat_3_lbl,
+      profile_tag_1, profile_tag_2, profile_tag_3, profile_tag_4
+    ];
+
+    const { rows } = await pool.query(query, values);
+    return rows[0];
   }
 
   // PROJECTS CRUD
   async createProject(projectData) {
     const { title, description, tech_stack, image_url, live_url, github_url, order_index } = projectData;
 
-    if (isMockDatabase) {
+    if (!pool) {
       const newProj = {
         id: Date.now(),
         title,
@@ -133,20 +122,17 @@ class DbService {
       return newProj;
     }
 
-    const { data, error } = await supabase
-      .from('projects')
-      .insert({ title, description, tech_stack, image_url, live_url, github_url, order_index })
-      .select()
-      .single();
-
-    if (error) throw error;
-    return data;
+    const { rows } = await pool.query(
+      'INSERT INTO projects (title, description, tech_stack, image_url, live_url, github_url, order_index) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *',
+      [title, description, tech_stack || [], image_url, live_url, github_url, order_index || 0]
+    );
+    return rows[0];
   }
 
   async updateProject(id, projectData) {
     const { title, description, tech_stack, image_url, live_url, github_url, order_index } = projectData;
 
-    if (isMockDatabase) {
+    if (!pool) {
       const idx = mockDb.projects.findIndex(p => p.id == id);
       if (idx === -1) throw new Error('Project not found');
       mockDb.projects[idx] = {
@@ -162,19 +148,25 @@ class DbService {
       return mockDb.projects[idx];
     }
 
-    const { data, error } = await supabase
-      .from('projects')
-      .update({ title, description, tech_stack, image_url, live_url, github_url, order_index })
-      .eq('id', id)
-      .select()
-      .single();
-
-    if (error) throw error;
-    return data;
+    const query = `
+      UPDATE projects SET 
+        title = COALESCE($1, title),
+        description = COALESCE($2, description),
+        tech_stack = COALESCE($3, tech_stack),
+        image_url = COALESCE($4, image_url),
+        live_url = COALESCE($5, live_url),
+        github_url = COALESCE($6, github_url),
+        order_index = COALESCE($7, order_index)
+      WHERE id = $8
+      RETURNING *
+    `;
+    const { rows } = await pool.query(query, [title, description, tech_stack, image_url, live_url, github_url, order_index, id]);
+    if (!rows[0]) throw new Error('Project not found');
+    return rows[0];
   }
 
   async deleteProject(id) {
-    if (isMockDatabase) {
+    if (!pool) {
       const lenBefore = mockDb.projects.length;
       mockDb.projects = mockDb.projects.filter(p => p.id != id);
       if (mockDb.projects.length === lenBefore) {
@@ -183,8 +175,8 @@ class DbService {
       return { success: true, message: 'Project deleted' };
     }
 
-    const { error } = await supabase.from('projects').delete().eq('id', id);
-    if (error) throw error;
+    const { rowCount } = await pool.query('DELETE FROM projects WHERE id = $1', [id]);
+    if (rowCount === 0) throw new Error('Project not found');
     return { success: true, message: 'Project deleted' };
   }
 
@@ -192,26 +184,23 @@ class DbService {
   async createEducation(educationData) {
     const { institution, degree, start_year, end_year, description } = educationData;
 
-    if (isMockDatabase) {
+    if (!pool) {
       const newEd = { id: Date.now(), institution, degree, start_year, end_year, description };
       mockDb.education.push(newEd);
       return newEd;
     }
 
-    const { data, error } = await supabase
-      .from('education')
-      .insert({ institution, degree, start_year, end_year, description })
-      .select()
-      .single();
-
-    if (error) throw error;
-    return data;
+    const { rows } = await pool.query(
+      'INSERT INTO education (institution, degree, start_year, end_year, description) VALUES ($1, $2, $3, $4, $5) RETURNING *',
+      [institution, degree, start_year, end_year, description]
+    );
+    return rows[0];
   }
 
   async updateEducation(id, educationData) {
     const { institution, degree, start_year, end_year, description } = educationData;
 
-    if (isMockDatabase) {
+    if (!pool) {
       const idx = mockDb.education.findIndex(e => e.id == id);
       if (idx === -1) throw new Error('Education entry not found');
       mockDb.education[idx] = {
@@ -225,19 +214,23 @@ class DbService {
       return mockDb.education[idx];
     }
 
-    const { data, error } = await supabase
-      .from('education')
-      .update({ institution, degree, start_year, end_year, description })
-      .eq('id', id)
-      .select()
-      .single();
-
-    if (error) throw error;
-    return data;
+    const query = `
+      UPDATE education SET 
+        institution = COALESCE($1, institution),
+        degree = COALESCE($2, degree),
+        start_year = COALESCE($3, start_year),
+        end_year = COALESCE($4, end_year),
+        description = COALESCE($5, description)
+      WHERE id = $6
+      RETURNING *
+    `;
+    const { rows } = await pool.query(query, [institution, degree, start_year, end_year, description, id]);
+    if (!rows[0]) throw new Error('Education entry not found');
+    return rows[0];
   }
 
   async deleteEducation(id) {
-    if (isMockDatabase) {
+    if (!pool) {
       const lenBefore = mockDb.education.length;
       mockDb.education = mockDb.education.filter(e => e.id != id);
       if (mockDb.education.length === lenBefore) {
@@ -246,8 +239,8 @@ class DbService {
       return { success: true, message: 'Education entry deleted' };
     }
 
-    const { error } = await supabase.from('education').delete().eq('id', id);
-    if (error) throw error;
+    const { rowCount } = await pool.query('DELETE FROM education WHERE id = $1', [id]);
+    if (rowCount === 0) throw new Error('Education entry not found');
     return { success: true, message: 'Education entry deleted' };
   }
 
@@ -255,26 +248,23 @@ class DbService {
   async createExperience(experienceData) {
     const { company, role, duration, achievements_array } = experienceData;
 
-    if (isMockDatabase) {
+    if (!pool) {
       const newExp = { id: Date.now(), company, role, duration, achievements_array: achievements_array || [] };
       mockDb.experience.push(newExp);
       return newExp;
     }
 
-    const { data, error } = await supabase
-      .from('experience')
-      .insert({ company, role, duration, achievements_array })
-      .select()
-      .single();
-
-    if (error) throw error;
-    return data;
+    const { rows } = await pool.query(
+      'INSERT INTO experience (company, role, duration, achievements_array) VALUES ($1, $2, $3, $4) RETURNING *',
+      [company, role, duration, achievements_array || []]
+    );
+    return rows[0];
   }
 
   async updateExperience(id, experienceData) {
     const { company, role, duration, achievements_array } = experienceData;
 
-    if (isMockDatabase) {
+    if (!pool) {
       const idx = mockDb.experience.findIndex(e => e.id == id);
       if (idx === -1) throw new Error('Experience entry not found');
       mockDb.experience[idx] = {
@@ -287,19 +277,22 @@ class DbService {
       return mockDb.experience[idx];
     }
 
-    const { data, error } = await supabase
-      .from('experience')
-      .update({ company, role, duration, achievements_array })
-      .eq('id', id)
-      .select()
-      .single();
-
-    if (error) throw error;
-    return data;
+    const query = `
+      UPDATE experience SET 
+        company = COALESCE($1, company),
+        role = COALESCE($2, role),
+        duration = COALESCE($3, duration),
+        achievements_array = COALESCE($4, achievements_array)
+      WHERE id = $5
+      RETURNING *
+    `;
+    const { rows } = await pool.query(query, [company, role, duration, achievements_array, id]);
+    if (!rows[0]) throw new Error('Experience entry not found');
+    return rows[0];
   }
 
   async deleteExperience(id) {
-    if (isMockDatabase) {
+    if (!pool) {
       const lenBefore = mockDb.experience.length;
       mockDb.experience = mockDb.experience.filter(e => e.id != id);
       if (mockDb.experience.length === lenBefore) {
@@ -308,8 +301,8 @@ class DbService {
       return { success: true, message: 'Experience entry deleted' };
     }
 
-    const { error } = await supabase.from('experience').delete().eq('id', id);
-    if (error) throw error;
+    const { rowCount } = await pool.query('DELETE FROM experience WHERE id = $1', [id]);
+    if (rowCount === 0) throw new Error('Experience entry not found');
     return { success: true, message: 'Experience entry deleted' };
   }
 
@@ -317,26 +310,23 @@ class DbService {
   async createSkill(skillData) {
     const { name, category, icon_svg, proficiency } = skillData;
 
-    if (isMockDatabase) {
+    if (!pool) {
       const newSkill = { id: Date.now(), name, category, icon_svg, proficiency: proficiency || 80 };
       mockDb.skills.push(newSkill);
       return newSkill;
     }
 
-    const { data, error } = await supabase
-      .from('skills')
-      .insert({ name, category, icon_svg, proficiency })
-      .select()
-      .single();
-
-    if (error) throw error;
-    return data;
+    const { rows } = await pool.query(
+      'INSERT INTO skills (name, category, icon_svg, proficiency) VALUES ($1, $2, $3, $4) RETURNING *',
+      [name, category, icon_svg || '', proficiency || 80]
+    );
+    return rows[0];
   }
 
   async updateSkill(id, skillData) {
     const { name, category, icon_svg, proficiency } = skillData;
 
-    if (isMockDatabase) {
+    if (!pool) {
       const idx = mockDb.skills.findIndex(s => s.id == id);
       if (idx === -1) throw new Error('Skill not found');
       mockDb.skills[idx] = {
@@ -349,19 +339,22 @@ class DbService {
       return mockDb.skills[idx];
     }
 
-    const { data, error } = await supabase
-      .from('skills')
-      .update({ name, category, icon_svg, proficiency })
-      .eq('id', id)
-      .select()
-      .single();
-
-    if (error) throw error;
-    return data;
+    const query = `
+      UPDATE skills SET 
+        name = COALESCE($1, name),
+        category = COALESCE($2, category),
+        icon_svg = COALESCE($3, icon_svg),
+        proficiency = COALESCE($4, proficiency)
+      WHERE id = $5
+      RETURNING *
+    `;
+    const { rows } = await pool.query(query, [name, category, icon_svg, proficiency, id]);
+    if (!rows[0]) throw new Error('Skill not found');
+    return rows[0];
   }
 
   async deleteSkill(id) {
-    if (isMockDatabase) {
+    if (!pool) {
       const lenBefore = mockDb.skills.length;
       mockDb.skills = mockDb.skills.filter(s => s.id != id);
       if (mockDb.skills.length === lenBefore) {
@@ -370,8 +363,8 @@ class DbService {
       return { success: true, message: 'Skill deleted' };
     }
 
-    const { error } = await supabase.from('skills').delete().eq('id', id);
-    if (error) throw error;
+    const { rowCount } = await pool.query('DELETE FROM skills WHERE id = $1', [id]);
+    if (rowCount === 0) throw new Error('Skill not found');
     return { success: true, message: 'Skill deleted' };
   }
 
@@ -379,7 +372,7 @@ class DbService {
   async createMessage(messageData) {
     const { name, email, subject, message } = messageData;
 
-    if (isMockDatabase) {
+    if (!pool) {
       const newMsg = {
         id: Date.now(),
         name,
@@ -392,32 +385,24 @@ class DbService {
       return newMsg;
     }
 
-    const { data, error } = await supabase
-      .from('messages')
-      .insert({ name, email, subject, message })
-      .select()
-      .single();
-
-    if (error) throw error;
-    return data;
+    const { rows } = await pool.query(
+      'INSERT INTO messages (name, email, subject, message) VALUES ($1, $2, $3, $4) RETURNING *',
+      [name, email, subject, message]
+    );
+    return rows[0];
   }
 
   async getMessages() {
-    if (isMockDatabase) {
+    if (!pool) {
       return [...mockDb.messages].sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
     }
 
-    const { data, error } = await supabase
-      .from('messages')
-      .select('*')
-      .order('created_at', { ascending: false });
-
-    if (error) throw error;
-    return data || [];
+    const { rows } = await pool.query('SELECT * FROM messages ORDER BY created_at DESC');
+    return rows;
   }
 
   async deleteMessage(id) {
-    if (isMockDatabase) {
+    if (!pool) {
       const lenBefore = mockDb.messages.length;
       mockDb.messages = mockDb.messages.filter(m => m.id != id);
       if (mockDb.messages.length === lenBefore) {
@@ -426,8 +411,8 @@ class DbService {
       return { success: true, message: 'Message deleted' };
     }
 
-    const { error } = await supabase.from('messages').delete().eq('id', id);
-    if (error) throw error;
+    const { rowCount } = await pool.query('DELETE FROM messages WHERE id = $1', [id]);
+    if (rowCount === 0) throw new Error('Message not found');
     return { success: true, message: 'Message deleted' };
   }
 }

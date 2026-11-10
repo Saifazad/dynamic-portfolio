@@ -1,11 +1,27 @@
 // Load environment variables
 require('dotenv').config();
+const { Pool } = require('pg');
 
-// Always use in-memory mock database (no external DB required)
-const supabase = null;
-const isMockDatabase = true;
+let pool = null;
+let isMockDatabase = false;
 
-console.log('✅ Using in-memory mock database (no external DB required)');
+const DATABASE_URL = process.env.DATABASE_URL;
+
+if (DATABASE_URL) {
+  try {
+    pool = new Pool({
+      connectionString: DATABASE_URL,
+      ssl: { rejectUnauthorized: false }
+    });
+    console.log('✅ Connected to PostgreSQL Database (Neon DB)');
+  } catch (err) {
+    console.error('❌ Failed to create Postgres pool, falling back to mock database:', err);
+    isMockDatabase = true;
+  }
+} else {
+  console.warn('⚠️ DATABASE_URL not provided. Using in-memory mock database.');
+  isMockDatabase = true;
+}
 
 const mockDb = {
   site_config: {
@@ -148,7 +164,7 @@ const mockDb = {
 
 
 module.exports = {
-  supabase,
+  pool,
   mockDb,
   isMockDatabase
 };
