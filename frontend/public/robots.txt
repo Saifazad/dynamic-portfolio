@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+
+# Sitemap location
+Sitemap: https://dynamic-portfolio-puce-tau.vercel.app/sitemap.xml
