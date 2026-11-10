@@ -1,16 +1,11 @@
-const { createClient } = require('@supabase/supabase-js');
-const dotenv = require('dotenv');
+// Load environment variables
+require('dotenv').config();
 
-// Fix Node.js < 22 WebSocket support for Supabase Realtime
-if (typeof globalThis.WebSocket === 'undefined') {
-  try { globalThis.WebSocket = require('ws'); } catch (e) { /* ws not available, skip */ }
-}
+// Always use in-memory mock database (no external DB required)
+const supabase = null;
+const isMockDatabase = true;
 
-// Load environment variables (just in case they weren't loaded yet)
-dotenv.config();
-
-let supabase = null;
-let isMockDatabase = false;
+console.log('✅ Using in-memory mock database (no external DB required)');
 
 const mockDb = {
   site_config: {
@@ -151,26 +146,6 @@ const mockDb = {
   messages: []
 };
 
-
-const hasSupabaseCreds = process.env.SUPABASE_URL && 
-                         process.env.SUPABASE_URL !== 'https://your-supabase-project.supabase.co' && 
-                         process.env.SUPABASE_KEY;
-
-if (hasSupabaseCreds) {
-  try {
-    supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY, {
-      realtime: { enabled: false },
-      auth: { persistSession: false, autoRefreshToken: false }
-    });
-    console.log('Successfully connected to Supabase Client');
-  } catch (error) {
-    console.error('Error initializing Supabase Client:', error);
-    isMockDatabase = true;
-  }
-} else {
-  console.warn('⚠️ Supabase credentials missing. Falling back to IN-MEMORY MOCK database.');
-  isMockDatabase = true;
-}
 
 module.exports = {
   supabase,
