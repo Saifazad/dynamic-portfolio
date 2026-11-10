@@ -2,7 +2,9 @@ const { createClient } = require('@supabase/supabase-js');
 const dotenv = require('dotenv');
 
 // Fix Node.js < 22 WebSocket support for Supabase Realtime
-globalThis.WebSocket = require('ws');
+if (typeof globalThis.WebSocket === 'undefined') {
+  try { globalThis.WebSocket = require('ws'); } catch (e) { /* ws not available, skip */ }
+}
 
 // Load environment variables (just in case they weren't loaded yet)
 dotenv.config();
@@ -31,7 +33,48 @@ const mockDb = {
     profile_tag_3: "Node.js",
     profile_tag_4: "SQL"
   },
-  projects: [],
+  projects: [
+    {
+      id: 1,
+      title: "Find My Carz",
+      description: "Cross-platform mobile application with advanced multi-parameter search filters, real-time paginated results, and auto-finance EMI calculation module.",
+      tech_stack: ["Flutter", "Dart", "Provider", "MVVM", "REST API", "Dio"],
+      image_url: "https://images.unsplash.com/photo-1552519507-da3b142c6e3d?w=800&auto=format&fit=crop&q=80",
+      live_url: "",
+      github_url: "https://github.com/Saifazad",
+      order_index: 1
+    },
+    {
+      id: 2,
+      title: "MirandMed",
+      description: "Cross-platform healthcare and medical appointment booking mobile app built with MVVM design pattern, dynamic pincode lookup, and robust networking layer.",
+      tech_stack: ["Flutter", "Dart", "Provider", "REST API"],
+      image_url: "https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=800&auto=format&fit=crop&q=80",
+      live_url: "",
+      github_url: "https://github.com/Saifazad",
+      order_index: 2
+    },
+    {
+      id: 3,
+      title: "GS Trucking Logistics System",
+      description: "Logistics management platform enabling real-time truck tracking from source to destination, driver assignment dashboard, and secure Express RESTful APIs.",
+      tech_stack: ["React.js", "Node.js", "Express.js", "MySQL", "Bcrypt.js"],
+      image_url: "https://images.unsplash.com/photo-1519003722824-194d4455a60c?w=800&auto=format&fit=crop&q=80",
+      live_url: "",
+      github_url: "https://github.com/Saifazad",
+      order_index: 3
+    },
+    {
+      id: 4,
+      title: "Vidya Institute Management System",
+      description: "Comprehensive institute management system to streamline operations, manage student data, and support administrative workflows.",
+      tech_stack: ["React.js", "Node.js", "Express.js", "MySQL", "Tailwind CSS"],
+      image_url: "https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=800&auto=format&fit=crop&q=80",
+      live_url: "",
+      github_url: "https://github.com/Saifazad",
+      order_index: 4
+    }
+  ],
   education: [
     {
       id: 1,
